@@ -1,148 +1,165 @@
 /*
-软件名称:闪挣
-更新时间：2021-02-18 @肥皂
-脚本说明：闪挣
-脚本为闪挣自动刷视频奖励和小游戏奖励
+软件名称:我的网红店 (越狱可多开)
+更新时间：2021-05-06 @肥皂
+脚本说明：我的网红店自动领取。
 
-上限暂时不知道多少，刷了一晚上有一万还没上限，没测试
+第一天可以提现一共九块钱。秒到。第二天18。第三天20。其他额度我是提现失败。不清楚了。视频数据数据是和食材大冲关三兄弟通用的。所以先把食材大冲关三兄弟的视频重写禁用。否则冲突。
 
-暂定一块钱一天？？？？？？
+我的网红店使用方法:
+1-进入游戏绑定微信先提现三毛。
+2-点击红包领取，看视频获得视频数据。领红包获得红包数据。
 
-食用方法:
-首次运行脚本，会提示获取body
-进入闪挣，娱乐赚，看视频领金币，看视频金币转圈结束，提示成功获取数据即可
+慢点运行。间隔久一点。。。。也不要一天到晚运行。
+本脚本以学习为主
 
-TG电报群: https://t.me/hahaha8028
-注意:
-扫描二维码下载
+TG通知群:https://t.me/Ariszy_Scripts
+TG电报交流群: https://t.me/hahaha8028
 
-二维码下载地址 https://raw.githubusercontent.com/age174/-/main/BB9F8DA3-E631-4B4C-A65A-751829C1D7EC.jpeg
+boxjs地址 :  
 
-保存二维码微信扫码打开下载。
+https://raw.githubusercontent.com/age174/-/main/feizao.box.json
 
-我的邀请码 : u35545875447  感谢大佬们填写 
-
-因为还没测出上限，可以试试每十分钟运行一次看看
-
-闪挣
+我的网红店
 圈X配置如下，其他软件自行测试
 [task_local]
-#闪挣
-10 * * * * https://raw.githubusercontent.com/age174/-/main/sz.js, tag=闪挣, img-url=https://ae01.alicdn.com/kf/U0eeed99dbe9a4cf99b73aaed7902a3a9z.jpg, enabled=true
-
+#我的网红店
+0-59 9-14 * * * https://raw.githubusercontent.com/age174/-/main/wdwhd.js, tag=我的网红店, img-url=https://ae01.alicdn.com/kf/Uc5a0618d6a404079af9216e1012e35efs.jpg, enabled=true
 
 [rewrite_local]
-#闪挣
-^https://api-9f9d25.sz365.cn/api/virtual_currency_v2/reward url script-request-header https://raw.githubusercontent.com/age174/-/main/sz.js
-
-
-
-#loon
-^https://api-9f9d25.sz365.cn/api/virtual_currency_v2/reward script-path=https://raw.githubusercontent.com/age174/-/main/sz.js, requires-header=true, timeout=10, tag=闪挣
-
-
-
-#surge
-
-闪挣 = type=http-request,pattern=^https://api-9f9d25.sz365.cn/api/virtual_currency_v2/reward,requires-header=1,max-size=0,script-path=https://raw.githubusercontent.com/age174/-/main/sz.js,script-update-interval=0
-
-
-
+#我的网红店视频
+https://api-access.pangolin-sdk-toutiao.com/api/ad/union/sdk/reward_video/reward/ url script-request-body https://raw.githubusercontent.com/age174/-/main/wdwhd.js
+#我的网红店红包
+https://tinygame-api.beijingqianji.com/en/check/imp_callback url script-request-body https://raw.githubusercontent.com/age174/-/main/wdwhd.js
 
 [MITM]
-hostname = api-9f9d25.sz365.cn
-
+hostname = tinygame-api.beijingqianji.com,api-access.pangolin-sdk-toutiao.com
 
 */
-const $ = new Env('闪挣');
-let szurl = $.getdata('szurl')
-let szhd = $.getdata('szhd')
+const $ = new Env('我的网红店');
+let status;
+status = (status = ($.getval("wdwhdstatus") || "1") ) > 1 ? `${status}` : ""; // 账号扩展字符
+const wdwhdhdArr = [],wdwhdbodyArr = [],wdwhdspbodyArr = [],wdwhdcount = ''
+let wdwhdhd = $.getdata('wdwhdhd')
+let wdwhdbody = $.getdata('wdwhdbody')
+let wdwhdspbody = $.getdata('wdwhdspbody')
+const sphd = {
+'Accept' : `*/*`,
+'Accept-Encoding' : `gzip, deflate, br`,
+'Connection' : `keep-alive`,
+'Content-Type' : `application/json`,
+'Host' : `api-access.pangolin-sdk-toutiao.com`,
+'User-Agent' : `Mozilla/5.0 (iPhone; CPU iPhone OS 14_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148`,
+'Accept-Language' : `zh-Hans-CN;q=1`
+};
 !(async () => {
   if (typeof $request !== "undefined") {
-    await szck()
+    await wdwhdck()
    
   } else {
-    for (let i = 0; i < 6; i++) {
-      $.index = i + 1
-      console.log(`\n闪挣第${i+1}次运行！💦\n等待60秒开始执行下一次任务`)
-    await szsp();
-     await $.wait(60000);
+    wdwhdhdArr.push($.getdata('wdwhdhd'))
+    wdwhdbodyArr.push($.getdata('wdwhdbody'))
+    wdwhdspbodyArr.push($.getdata('wdwhdspbody'))
+    let wdwhdcount = ($.getval('wdwhdcount') || '1');
+  for (let i = 2; i <= wdwhdcount; i++) {
+    wdwhdhdArr.push($.getdata(`wdwhdhd${i}`))
+    wdwhdbodyArr.push($.getdata(`wdwhdbody${i}`))
+    wdwhdspbodyArr.push($.getdata(`wdwhdspbody${i}`))
   }
-//$.msg("","","闪挣运行完毕！")
+    console.log(`------------- 共${wdwhdhdArr.length}个账号-------------\n`)
+      for (let i = 0; i < wdwhdhdArr.length; i++) {
+        if (wdwhdhdArr[i]) {
+          wdwhdhd = wdwhdhdArr[i];
+          wdwhdbody = wdwhdbodyArr[i];
+          wdwhdspbody = wdwhdspbodyArr[i];
+          $.index = i + 1;
+          console.log(`\n开始【我的网红店${$.index}】`)
+   
+    
+         await wdwhdsp();
+         
+
+    
+    
   }
+}}
+
 })()
   .catch((e) => $.logErr(e))
   .finally(() => $.done())
-//闪挣数据获取
-function szck() {
-   if ($request.url.indexOf("virtual_currency_v2/reward") > -1){
- const szurl = $request.url
-  if(szurl)     $.setdata(szurl,'szurl')
-    $.log(szurl)
-    const szhd = JSON.stringify($request.headers)
-        if(szhd)    $.setdata(szhd,'szhd')
-    $.log(szhd)
-    
-   $.msg($.name,"","闪挣数据获取成功！")
+//数据获取
+
+
+function wdwhdck() {
+   if ($request.url.indexOf("imp_callback") > -1) {
+ 
+  const wdwhdhd = JSON.stringify($request.headers)
+        if(wdwhdhd)    $.setdata(wdwhdhd,`wdwhdhd${status}`)
+$.log(wdwhdhd)
+const wdwhdbody = $request.body
+        if(wdwhdbody)    $.setdata(wdwhdbody,`wdwhdbody${status}`)
+$.log(wdwhdbody)
+   $.msg($.name,"",'我的网红店'+`${status}` +'红包数据获取成功！')
+  }else if ($request.url.indexOf("reward_video/reward/") > -1) {
+ 
+const wdwhdspbody = $request.body
+        if(wdwhdspbody)    $.setdata(wdwhdspbody,`wdwhdspbody${status}`)
+$.log(wdwhdspbody)
+   $.msg($.name,"",'我的网红店'+`${status}` +'视频数据获取成功！')
   }
 }
 
-
-
-
-
-
-//闪挣小视频
-function szsp(timeout = 0) {
+//红包
+function wdwhdhb(timeout = 0) {
   return new Promise((resolve) => {
-    setTimeout( ()=>{
-      if (typeof $.getdata('szurl') === "undefined") {
-        $.msg($.name,"",'请先获取闪挣数据',)
-        $.done()
-      }
+
 let url = {
-        url : 'https://api-9f9d25.sz365.cn/api/virtual_currency_v2/reward',
-        headers : JSON.parse($.getdata('szhd')),
-        body : `type=205`,}
+        url : 'https://tinygame-api.beijingqianji.com/en/check/imp_callback',
+        headers : JSON.parse(wdwhdhd),
+        body : wdwhdbody,
+}
       $.post(url, async (err, resp, data) => {
         try {
-           
-    const result = JSON.parse(data)
-        if(result.code == 0){
-        console.log('闪挣小视频回执:成功🌝 '+result.message)
+    //const result = JSON.parse(data)
+        if(resp.statusCode == 200){
+  $.log(`\n我的网红店:成功领取红包`)
+} else {
+
+        $.log(`\n我的网红店:领取失败${data}`)
+ 
 }
-if(result.code == 400){
-        console.log('闪挣小视频回执:失败🚫 '+result.message)}
-await $.wait(60000);
-await szyx()
+   
         } catch (e) {
           //$.logErr(e, resp);
         } finally {
           resolve()
         }
-      })
     },timeout)
   })
 }
 
-//闪挣小游戏     
-function szyx(timeout = 0) {
+
+function wdwhdsp(timeout = 0) {
   return new Promise((resolve) => {
+
 let url = {
-        url : 'https://api-9f9d25.sz365.cn/api/virtual_currency_v2/reward',
-        headers : JSON.parse($.getdata('szhd')),
-        body :  `type=203`,}
+        url : 'https://api-access.pangolin-sdk-toutiao.com/api/ad/union/sdk/reward_video/reward/',
+        headers : sphd,
+        body : wdwhdspbody,
+}
       $.post(url, async (err, resp, data) => {
         try {
-           
     const result = JSON.parse(data)
-        if(result.code == 0){
-        console.log('闪挣小游戏回执:成功🌝 '+result.message)
-        await $.wait(60000);
-}
-if(result.code == 400){
-        console.log('闪挣小游戏回执:失败🚫 '+result.mesaage)}
+        if(result.cypher == 3){
+  $.log(`\n我的网红店视频观看成功`)
+    await $.wait(15000)
+   await wdwhdhb();
+    
+} else {
 
+        $.log(`\n我的网红店视频观看失败:${data}`)
+ 
+}
+   
         } catch (e) {
           //$.logErr(e, resp);
         } finally {

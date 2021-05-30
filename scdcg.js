@@ -1,148 +1,171 @@
 /*
-软件名称:闪挣
-更新时间：2021-02-18 @肥皂
-脚本说明：闪挣
-脚本为闪挣自动刷视频奖励和小游戏奖励
+软件名称:食材大冲关 (越狱可多开)
+更新时间：2021-04-30 @肥皂
+脚本说明：食材大冲关自动刷红包。。
 
-上限暂时不知道多少，刷了一晚上有一万还没上限，没测试
+第一天有三块左右吧。抓包后重新登录后要重新抓包。登录信息会过期。提现手动吧。带了验证码没法。
 
-暂定一块钱一天？？？？？？
+食材大冲关使用方法:
+1-世界红包群领取一个红包,观看广告结束获得视频数据。
+2-领取红包获得红包数据。
 
-食用方法:
-首次运行脚本，会提示获取body
-进入闪挣，娱乐赚，看视频领金币，看视频金币转圈结束，提示成功获取数据即可
+注意事项。如果不能获取视频数据只能多试试了。进任务红包领取或者家族群都视频。不行就退了游戏再打开
 
-TG电报群: https://t.me/hahaha8028
-注意:
-扫描二维码下载
 
-二维码下载地址 https://raw.githubusercontent.com/age174/-/main/BB9F8DA3-E631-4B4C-A65A-751829C1D7EC.jpeg
+扫码走个邀请支持一下吧二维码地址: https://ae01.alicdn.com/kf/U48226d52baa84b0abb391b7483c53450o.jpg
 
-保存二维码微信扫码打开下载。
 
-我的邀请码 : u35545875447  感谢大佬们填写 
+本脚本以学习为主
 
-因为还没测出上限，可以试试每十分钟运行一次看看
+TG通知群:https://t.me/Ariszy_Scripts
+TG电报交流群: https://t.me/hahaha8028
 
-闪挣
+boxjs地址 :  
+
+https://raw.githubusercontent.com/age174/-/main/feizao.box.json
+
+食材大冲关
 圈X配置如下，其他软件自行测试
 [task_local]
-#闪挣
-10 * * * * https://raw.githubusercontent.com/age174/-/main/sz.js, tag=闪挣, img-url=https://ae01.alicdn.com/kf/U0eeed99dbe9a4cf99b73aaed7902a3a9z.jpg, enabled=true
-
+#食材大冲关
+10 9 * * * https://raw.githubusercontent.com/age174/-/main/scdcg.js, tag=食材大冲关, img-url=https://ae01.alicdn.com/kf/Ue353b658a4424a1e873d0b66620d06a41.jpg, enabled=true
 
 [rewrite_local]
-#闪挣
-^https://api-9f9d25.sz365.cn/api/virtual_currency_v2/reward url script-request-header https://raw.githubusercontent.com/age174/-/main/sz.js
-
-
-
-#loon
-^https://api-9f9d25.sz365.cn/api/virtual_currency_v2/reward script-path=https://raw.githubusercontent.com/age174/-/main/sz.js, requires-header=true, timeout=10, tag=闪挣
-
-
-
-#surge
-
-闪挣 = type=http-request,pattern=^https://api-9f9d25.sz365.cn/api/virtual_currency_v2/reward,requires-header=1,max-size=0,script-path=https://raw.githubusercontent.com/age174/-/main/sz.js,script-update-interval=0
-
-
-
+#食材大冲关视频
+https://api-access.pangolin-sdk-toutiao.com/api/ad/union/sdk/reward_video/reward/ url script-request-body https://raw.githubusercontent.com/age174/-/main/scdcg.js
+#食材大冲关红包
+https://redbag.renyouwangluo.cn/api/redbag/normal url script-request-body https://raw.githubusercontent.com/age174/-/main/scdcg.js
 
 [MITM]
-hostname = api-9f9d25.sz365.cn
-
+hostname = redbag.renyouwangluo.cn,api-access.pangolin-sdk-toutiao.com
 
 */
-const $ = new Env('闪挣');
-let szurl = $.getdata('szurl')
-let szhd = $.getdata('szhd')
+const $ = new Env('食材大冲关');
+let status;
+status = (status = ($.getval("scdcgstatus") || "1") ) > 1 ? `${status}` : ""; // 账号扩展字符
+const scdcghdArr = [],scdcgbodyArr = [],scdcgspbodyArr = [],scdcgcount = ''
+let scdcghd = $.getdata('scdcghd')
+let scdcgbody = $.getdata('scdcgbody')
+let scdcgspbody = $.getdata('scdcgspbody')
+const sphd = {
+'Accept' : `*/*`,
+'Accept-Encoding' : `gzip, deflate, br`,
+'Connection' : `keep-alive`,
+'Content-Type' : `application/json`,
+'Host' : `api-access.pangolin-sdk-toutiao.com`,
+'User-Agent' : `Mozilla/5.0 (iPhone; CPU iPhone OS 14_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148`,
+'Accept-Language' : `zh-Hans-CN;q=1`
+};
 !(async () => {
   if (typeof $request !== "undefined") {
-    await szck()
+    await scdcgck()
    
   } else {
-    for (let i = 0; i < 6; i++) {
-      $.index = i + 1
-      console.log(`\n闪挣第${i+1}次运行！💦\n等待60秒开始执行下一次任务`)
-    await szsp();
-     await $.wait(60000);
+    scdcghdArr.push($.getdata('scdcghd'))
+    scdcgbodyArr.push($.getdata('scdcgbody'))
+    scdcgspbodyArr.push($.getdata('scdcgspbody'))
+    let scdcgcount = ($.getval('scdcgcount') || '1');
+  for (let i = 2; i <= scdcgcount; i++) {
+    scdcghdArr.push($.getdata(`scdcghd${i}`))
+    scdcgbodyArr.push($.getdata(`scdcgbody${i}`))
+    scdcgspbodyArr.push($.getdata(`scdcgspbody${i}`))
   }
-//$.msg("","","闪挣运行完毕！")
+    console.log(`------------- 共${scdcghdArr.length}个账号-------------\n`)
+      for (let i = 0; i < scdcghdArr.length; i++) {
+        if (scdcghdArr[i]) {
+          scdcghd = scdcghdArr[i];
+          scdcgbody = scdcgbodyArr[i];
+          scdcgspbody = scdcgspbodyArr[i];
+          $.index = i + 1;
+          console.log(`\n开始【食材大冲关${$.index}】`)
+   
+    
+         await scdcgsp();
+         
+
+    
+    
   }
+}}
+
 })()
   .catch((e) => $.logErr(e))
   .finally(() => $.done())
-//闪挣数据获取
-function szck() {
-   if ($request.url.indexOf("virtual_currency_v2/reward") > -1){
- const szurl = $request.url
-  if(szurl)     $.setdata(szurl,'szurl')
-    $.log(szurl)
-    const szhd = JSON.stringify($request.headers)
-        if(szhd)    $.setdata(szhd,'szhd')
-    $.log(szhd)
-    
-   $.msg($.name,"","闪挣数据获取成功！")
+//数据获取
+
+
+function scdcgck() {
+   if ($request.url.indexOf("normal") > -1) {
+ 
+  const scdcghd = JSON.stringify($request.headers)
+        if(scdcghd)    $.setdata(scdcghd,`scdcghd${status}`)
+$.log(scdcghd)
+const scdcgbody = $request.body
+        if(scdcgbody)    $.setdata(scdcgbody,`scdcgbody${status}`)
+$.log(scdcgbody)
+   $.msg($.name,"",'食材大冲关'+`${status}` +'红包数据获取成功！')
+  }else if ($request.url.indexOf("reward_video/reward/") > -1) {
+ 
+const scdcgspbody = $request.body
+        if(scdcgspbody)    $.setdata(scdcgspbody,`scdcgspbody${status}`)
+$.log(scdcgspbody)
+   $.msg($.name,"",'食材大冲关'+`${status}` +'视频数据获取成功！')
   }
 }
 
-
-
-
-
-
-//闪挣小视频
-function szsp(timeout = 0) {
+//红包
+function scdcghb(timeout = 0) {
   return new Promise((resolve) => {
-    setTimeout( ()=>{
-      if (typeof $.getdata('szurl') === "undefined") {
-        $.msg($.name,"",'请先获取闪挣数据',)
-        $.done()
-      }
+
 let url = {
-        url : 'https://api-9f9d25.sz365.cn/api/virtual_currency_v2/reward',
-        headers : JSON.parse($.getdata('szhd')),
-        body : `type=205`,}
+        url : 'https://redbag.renyouwangluo.cn/api/redbag/normal',
+        headers : JSON.parse(scdcghd),
+        body : scdcgbody,
+}
       $.post(url, async (err, resp, data) => {
         try {
-           
     const result = JSON.parse(data)
-        if(result.code == 0){
-        console.log('闪挣小视频回执:成功🌝 '+result.message)
+        if(result.code == 1){
+  $.log(`\n食材大冲关:成功领取${result.data.money}余额:${result.data.redbag}`)
+await scdcgsp();
+} else {
+
+        $.log(`\n食材大冲关:领取失败${data}`)
+ 
 }
-if(result.code == 400){
-        console.log('闪挣小视频回执:失败🚫 '+result.message)}
-await $.wait(60000);
-await szyx()
+   
         } catch (e) {
           //$.logErr(e, resp);
         } finally {
           resolve()
         }
-      })
     },timeout)
   })
 }
 
-//闪挣小游戏     
-function szyx(timeout = 0) {
+
+function scdcgsp(timeout = 0) {
   return new Promise((resolve) => {
+
 let url = {
-        url : 'https://api-9f9d25.sz365.cn/api/virtual_currency_v2/reward',
-        headers : JSON.parse($.getdata('szhd')),
-        body :  `type=203`,}
+        url : 'https://api-access.pangolin-sdk-toutiao.com/api/ad/union/sdk/reward_video/reward/',
+        headers : sphd,
+        body : scdcgspbody,
+}
       $.post(url, async (err, resp, data) => {
         try {
-           
     const result = JSON.parse(data)
-        if(result.code == 0){
-        console.log('闪挣小游戏回执:成功🌝 '+result.message)
-        await $.wait(60000);
-}
-if(result.code == 400){
-        console.log('闪挣小游戏回执:失败🚫 '+result.mesaage)}
+        if(result.cypher == 2){
+  $.log(`\n食材大冲关视频观看成功`)
+    await $.wait(3000)
+   await scdcghb();
+    
+} else {
 
+        $.log(`\n食材大冲关视频观看失败:${data}`)
+ 
+}
+   
         } catch (e) {
           //$.logErr(e, resp);
         } finally {

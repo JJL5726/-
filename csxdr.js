@@ -1,148 +1,169 @@
 /*
-软件名称:闪挣
-更新时间：2021-02-18 @肥皂
-脚本说明：闪挣
-脚本为闪挣自动刷视频奖励和小游戏奖励
+软件名称:超市小达人 (越狱可多开)
+更新时间：2021-05-09 @肥皂
+脚本说明：超市小达人自动刷红包。。
+玩法和食材大冲关一样。先把食材大冲关的视频重写关了。。。
+第一天有三块左右吧。抓包后重新登录后要重新抓包。登录信息会过期。提现手动吧。带了验证码没法。
 
-上限暂时不知道多少，刷了一晚上有一万还没上限，没测试
+超市小达人使用方法:
+1-世界红包群领取一个红包,观看广告结束获得视频数据。
+2-领取红包获得红包数据。
 
-暂定一块钱一天？？？？？？
+注意事项。如果不能获取视频数据只能多试试了。进任务红包领取或者家族群都视频。不行就退了游戏再打开
 
-食用方法:
-首次运行脚本，会提示获取body
-进入闪挣，娱乐赚，看视频领金币，看视频金币转圈结束，提示成功获取数据即可
 
-TG电报群: https://t.me/hahaha8028
-注意:
-扫描二维码下载
 
-二维码下载地址 https://raw.githubusercontent.com/age174/-/main/BB9F8DA3-E631-4B4C-A65A-751829C1D7EC.jpeg
+本脚本以学习为主
 
-保存二维码微信扫码打开下载。
+TG通知群:https://t.me/Ariszy_Scripts
+TG电报交流群: https://t.me/hahaha8028
 
-我的邀请码 : u35545875447  感谢大佬们填写 
+boxjs地址 :  
 
-因为还没测出上限，可以试试每十分钟运行一次看看
+https://raw.githubusercontent.com/age174/-/main/feizao.box.json
 
-闪挣
+超市小达人
 圈X配置如下，其他软件自行测试
 [task_local]
-#闪挣
-10 * * * * https://raw.githubusercontent.com/age174/-/main/sz.js, tag=闪挣, img-url=https://ae01.alicdn.com/kf/U0eeed99dbe9a4cf99b73aaed7902a3a9z.jpg, enabled=true
-
+#超市小达人
+10 9 * * * https://raw.githubusercontent.com/age174/-/main/csxdr.js, tag=超市小达人, img-url=https://ae01.alicdn.com/kf/Udd9cb36174cf41a7a69e28a643a360a9a.jpg, enabled=true
 
 [rewrite_local]
-#闪挣
-^https://api-9f9d25.sz365.cn/api/virtual_currency_v2/reward url script-request-header https://raw.githubusercontent.com/age174/-/main/sz.js
-
-
-
-#loon
-^https://api-9f9d25.sz365.cn/api/virtual_currency_v2/reward script-path=https://raw.githubusercontent.com/age174/-/main/sz.js, requires-header=true, timeout=10, tag=闪挣
-
-
-
-#surge
-
-闪挣 = type=http-request,pattern=^https://api-9f9d25.sz365.cn/api/virtual_currency_v2/reward,requires-header=1,max-size=0,script-path=https://raw.githubusercontent.com/age174/-/main/sz.js,script-update-interval=0
-
-
-
+#超市小达人视频
+https://api-access.pangolin-sdk-toutiao.com/api/ad/union/sdk/reward_video/reward/ url script-request-body https://raw.githubusercontent.com/age174/-/main/csxdr.js
+#超市小达人红包
+https://market.renyouwangluo.cn/api/redbag/normal url script-request-body https://raw.githubusercontent.com/age174/-/main/csxdr.js
 
 [MITM]
-hostname = api-9f9d25.sz365.cn
-
+hostname = market.renyouwangluo.cn,api-access.pangolin-sdk-toutiao.com
 
 */
-const $ = new Env('闪挣');
-let szurl = $.getdata('szurl')
-let szhd = $.getdata('szhd')
+const $ = new Env('超市小达人');
+let status;
+status = (status = ($.getval("csxdrstatus") || "1") ) > 1 ? `${status}` : ""; // 账号扩展字符
+const csxdrhdArr = [],csxdrbodyArr = [],csxdrspbodyArr = [],csxdrcount = ''
+let csxdrhd = $.getdata('csxdrhd')
+let csxdrbody = $.getdata('csxdrbody')
+let csxdrspbody = $.getdata('csxdrspbody')
+const sphd = {
+'Accept' : `*/*`,
+'Accept-Encoding' : `gzip, deflate, br`,
+'Connection' : `keep-alive`,
+'Content-Type' : `application/json`,
+'Host' : `api-access.pangolin-sdk-toutiao.com`,
+'User-Agent' : `Mozilla/5.0 (iPhone; CPU iPhone OS 14_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148`,
+'Accept-Language' : `zh-Hans-CN;q=1`
+};
 !(async () => {
   if (typeof $request !== "undefined") {
-    await szck()
+    await csxdrck()
    
   } else {
-    for (let i = 0; i < 6; i++) {
-      $.index = i + 1
-      console.log(`\n闪挣第${i+1}次运行！💦\n等待60秒开始执行下一次任务`)
-    await szsp();
-     await $.wait(60000);
+    csxdrhdArr.push($.getdata('csxdrhd'))
+    csxdrbodyArr.push($.getdata('csxdrbody'))
+    csxdrspbodyArr.push($.getdata('csxdrspbody'))
+    let csxdrcount = ($.getval('csxdrcount') || '1');
+  for (let i = 2; i <= csxdrcount; i++) {
+    csxdrhdArr.push($.getdata(`csxdrhd${i}`))
+    csxdrbodyArr.push($.getdata(`csxdrbody${i}`))
+    csxdrspbodyArr.push($.getdata(`csxdrspbody${i}`))
   }
-//$.msg("","","闪挣运行完毕！")
+    console.log(`------------- 共${csxdrhdArr.length}个账号-------------\n`)
+      for (let i = 0; i < csxdrhdArr.length; i++) {
+        if (csxdrhdArr[i]) {
+          csxdrhd = csxdrhdArr[i];
+          csxdrbody = csxdrbodyArr[i];
+          csxdrspbody = csxdrspbodyArr[i];
+          $.index = i + 1;
+          console.log(`\n开始【超市小达人${$.index}】`)
+   
+    
+         await csxdrsp();
+         
+
+    
+    
   }
+}}
+
 })()
   .catch((e) => $.logErr(e))
   .finally(() => $.done())
-//闪挣数据获取
-function szck() {
-   if ($request.url.indexOf("virtual_currency_v2/reward") > -1){
- const szurl = $request.url
-  if(szurl)     $.setdata(szurl,'szurl')
-    $.log(szurl)
-    const szhd = JSON.stringify($request.headers)
-        if(szhd)    $.setdata(szhd,'szhd')
-    $.log(szhd)
-    
-   $.msg($.name,"","闪挣数据获取成功！")
+//数据获取
+
+
+function csxdrck() {
+   if ($request.url.indexOf("normal") > -1) {
+ 
+  const csxdrhd = JSON.stringify($request.headers)
+        if(csxdrhd)    $.setdata(csxdrhd,`csxdrhd${status}`)
+$.log(csxdrhd)
+const csxdrbody = $request.body
+        if(csxdrbody)    $.setdata(csxdrbody,`csxdrbody${status}`)
+$.log(csxdrbody)
+   $.msg($.name,"",'超市小达人'+`${status}` +'红包数据获取成功！')
+  }else if ($request.url.indexOf("reward_video/reward/") > -1) {
+ 
+const csxdrspbody = $request.body
+        if(csxdrspbody)    $.setdata(csxdrspbody,`csxdrspbody${status}`)
+$.log(csxdrspbody)
+   $.msg($.name,"",'超市小达人'+`${status}` +'视频数据获取成功！')
   }
 }
 
-
-
-
-
-
-//闪挣小视频
-function szsp(timeout = 0) {
+//红包
+function csxdrhb(timeout = 0) {
   return new Promise((resolve) => {
-    setTimeout( ()=>{
-      if (typeof $.getdata('szurl') === "undefined") {
-        $.msg($.name,"",'请先获取闪挣数据',)
-        $.done()
-      }
+
 let url = {
-        url : 'https://api-9f9d25.sz365.cn/api/virtual_currency_v2/reward',
-        headers : JSON.parse($.getdata('szhd')),
-        body : `type=205`,}
+        url : 'https://market.renyouwangluo.cn/api/redbag/normal',
+        headers : JSON.parse(csxdrhd),
+        body : csxdrbody,
+}
       $.post(url, async (err, resp, data) => {
         try {
-           
     const result = JSON.parse(data)
-        if(result.code == 0){
-        console.log('闪挣小视频回执:成功🌝 '+result.message)
+        if(result.code == 1){
+  $.log(`\n超市小达人:成功领取${result.data.money}余额:${result.data.redbag}`)
+await csxdrsp();
+} else {
+
+        $.log(`\n超市小达人:领取失败${data}`)
+ 
 }
-if(result.code == 400){
-        console.log('闪挣小视频回执:失败🚫 '+result.message)}
-await $.wait(60000);
-await szyx()
+   
         } catch (e) {
           //$.logErr(e, resp);
         } finally {
           resolve()
         }
-      })
     },timeout)
   })
 }
 
-//闪挣小游戏     
-function szyx(timeout = 0) {
+
+function csxdrsp(timeout = 0) {
   return new Promise((resolve) => {
+
 let url = {
-        url : 'https://api-9f9d25.sz365.cn/api/virtual_currency_v2/reward',
-        headers : JSON.parse($.getdata('szhd')),
-        body :  `type=203`,}
+        url : 'https://api-access.pangolin-sdk-toutiao.com/api/ad/union/sdk/reward_video/reward/',
+        headers : sphd,
+        body : csxdrspbody,
+}
       $.post(url, async (err, resp, data) => {
         try {
-           
     const result = JSON.parse(data)
-        if(result.code == 0){
-        console.log('闪挣小游戏回执:成功🌝 '+result.message)
-        await $.wait(60000);
-}
-if(result.code == 400){
-        console.log('闪挣小游戏回执:失败🚫 '+result.mesaage)}
+        if(result.cypher == 2){
+  $.log(`\n超市小达人视频观看成功`)
+    await $.wait(3000)
+   await csxdrhb();
+    
+} else {
 
+        $.log(`\n超市小达人视频观看失败:${data}`)
+ 
+}
+   
         } catch (e) {
           //$.logErr(e, resp);
         } finally {
